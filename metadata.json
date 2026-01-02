@@ -1,0 +1,7 @@
+{
+  "name": "CivicCare - Local Emergency & Civic Support",
+  "description": "A robust platform for managing local emergency contacts, blood donation requests, and SOS alerts with role-based access for citizens and administrators.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
