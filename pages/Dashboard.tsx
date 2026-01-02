@@ -9,9 +9,9 @@ import { Role } from '../types';
 import api from '../services/api';
 
 interface DashboardStats {
-  activeSos: number;
-  availableDonors: number;
-  verifiedServices: number;
+  activeSosCount: number;
+  availableDonorCount: number;
+  verifiedServiceCount: number;
 }
 
 interface DashboardProps {
@@ -40,10 +40,29 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   }, []);
 
   const statItems = [
-    { label: 'Active SOS', value: stats?.activeSos, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
-    { label: 'Available Donors', value: stats?.availableDonors, icon: Droplet, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Verified Services', value: stats?.verifiedServices, icon: PhoneCall, color: 'text-green-600', bg: 'bg-green-50' },
-  ];
+  {
+    label: 'Active SOS',
+    value: stats?.activeSosCount,
+    icon: AlertTriangle,
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+  },
+  {
+    label: 'Available Donors',
+    value: stats?.availableDonorCount,
+    icon: Droplet,
+    color: 'text-blue-600',
+    bg: 'bg-blue-50',
+  },
+  {
+    label: 'Verified Services',
+    value: stats?.verifiedServiceCount,
+    icon: PhoneCall,
+    color: 'text-green-600',
+    bg: 'bg-green-50',
+  },
+];
+
 
   const quickActions = [
     { title: 'Emergency Contacts', desc: 'Find local services', icon: PhoneCall, href: '/emergency', color: 'bg-blue-600' },

@@ -5,12 +5,12 @@ import { BLOOD_GROUPS } from '../constants';
 import api from '../services/api';
 
 interface Donor {
-  id: string;
+  id: number;
   name: string;
-  group: string;
+  bloodGroup: string;
   city: string;
   phone: string;
-  status: 'VERIFIED' | 'AVAILABLE' | 'INACTIVE';
+  available: boolean;
 }
 
 const BloodDonation: React.FC = () => {
@@ -20,29 +20,37 @@ const BloodDonation: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDonors = async () => {
-      setLoading(true);
-      try {
-        const params = selectedGroup !== 'ALL' ? { group: selectedGroup } : {};
-        const response = await api.get('/blood-donors', { params });
-        setDonors(response.data);
-      } catch (err) {
-        console.error('Failed to fetch donors');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (activeTab === 'DONORS') fetchDonors();
-  }, [selectedGroup, activeTab]);
-
-  const getStatusBadge = (status: string) => {
-    const classes = {
-      VERIFIED: 'bg-green-100 text-green-700',
-      AVAILABLE: 'bg-blue-100 text-blue-700',
-      INACTIVE: 'bg-gray-100 text-gray-700'
-    };
-    return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${classes[status as keyof typeof classes]}`}>{status}</span>;
+  const fetchDonors = async () => {
+    setLoading(true);
+    try {
+      const params = selectedGroup !== 'ALL' ? { group: selectedGroup } : {};
+      const response = await api.get('/blood-donors', { params });
+      setDonors(response.data);
+    } catch (err) {
+      console.error('Failed to fetch donors', err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (activeTab === 'DONORS') fetchDonors();
+}, [selectedGroup, activeTab]);
+
+
+  const getStatusBadge = (available: boolean) => {
+  return (
+    <span
+      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+        available
+          ? 'bg-green-100 text-green-700'
+          : 'bg-gray-100 text-gray-700'
+      }`}
+    >
+      {available ? 'AVAILABLE' : 'INACTIVE'}
+    </span>
+  );
+};
+
 
   return (
     <div className="space-y-6">
@@ -102,11 +110,11 @@ const BloodDonation: React.FC = () => {
                 <div key={donor.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-bold text-lg border border-red-100">
-                      {donor.group}
+                      {donor.bloodGroup}
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                        {donor.name} {getStatusBadge(donor.status)}
+                        {donor.name} {getStatusBadge(donor.available)}
                       </h4>
                       <p className="text-sm text-gray-500">{donor.city}</p>
                     </div>
