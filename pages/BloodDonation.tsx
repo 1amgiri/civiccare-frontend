@@ -1,6 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
-import { Droplet, UserPlus, Heart, List, Phone, Info, Send, Hospital, Loader2, CheckCircle } from 'lucide-react';
+import {
+  Droplet,
+  UserPlus,
+  List,
+  Phone,
+  Send,
+  Loader2
+} from 'lucide-react';
 import { BLOOD_GROUPS } from '../constants';
 import api from '../services/api';
 
@@ -19,120 +25,292 @@ const BloodDonation: React.FC = () => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(false);
 
+  /* ---------------- DONOR LIST ---------------- */
   useEffect(() => {
-  const fetchDonors = async () => {
-    setLoading(true);
-    try {
-      const params = selectedGroup !== 'ALL' ? { group: selectedGroup } : {};
-      const response = await api.get('/blood-donors', { params });
-      setDonors(response.data);
-    } catch (err) {
-      console.error('Failed to fetch donors', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchDonors = async () => {
+      setLoading(true);
+      try {
+        const params = selectedGroup !== 'ALL' ? { group: selectedGroup } : {};
+        const res = await api.get('/blood-donors', { params });
+        setDonors(res.data);
+      } catch {
+        alert('Failed to fetch donors');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (activeTab === 'DONORS') fetchDonors();
-}, [selectedGroup, activeTab]);
+    if (activeTab === 'DONORS') fetchDonors();
+  }, [activeTab, selectedGroup]);
 
-
-  const getStatusBadge = (available: boolean) => {
-  return (
+  const getStatusBadge = (available: boolean) => (
     <span
-      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-        available
-          ? 'bg-green-100 text-green-700'
-          : 'bg-gray-100 text-gray-700'
+      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+        available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
       }`}
     >
       {available ? 'AVAILABLE' : 'INACTIVE'}
     </span>
   );
-};
 
+  /* ---------------- REQUEST BLOOD ---------------- */
+  const [requestForm, setRequestForm] = useState({
+  patientName: '',
+  bloodGroup: '',
+  city: '',
+  hospitalName: '',
+  contactPhone: ''
+});
 
+  const [requestLoading, setRequestLoading] = useState(false);
+
+  const submitRequest = async () => {
+    try {
+      setRequestLoading(true);
+      await api.post('/blood-requests', requestForm); // ✅ FIXED
+      alert('Blood request submitted successfully');
+      setRequestForm({
+        patientName: '',
+        bloodGroup: '',
+        city: '',
+        hospitalName: '',
+        contactPhone: ''
+      });
+      setActiveTab('DONORS');
+    } catch {
+      alert('Failed to submit request');
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
+  /* ---------------- REGISTER DONOR ---------------- */
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    bloodGroup: '',
+    city: '',
+    phone: ''
+  });
+  const [registerLoading, setRegisterLoading] = useState(false);
+
+  const submitRegister = async () => {
+    try {
+      setRegisterLoading(true);
+      await api.post('/blood-donors', registerForm);
+      alert('Donor registered successfully');
+      setRegisterForm({
+        name: '',
+        bloodGroup: '',
+        city: '',
+        phone: ''
+      });
+      setActiveTab('DONORS');
+    } catch {
+      alert('Failed to register donor');
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
+
+  /* ---------------- UI ---------------- */
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Blood Bank & Donation</h1>
           <p className="text-gray-500">Backend synchronized donor network</p>
         </div>
-        <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto no-scrollbar">
-          {['DONORS', 'REQUEST', 'REGISTER'].map((tab) => (
+
+        <div className="flex bg-gray-100 p-1 rounded-xl">
+          {['DONORS', 'REQUEST', 'REGISTER'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === tab ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              className={`px-4 py-2 rounded-lg text-sm font-semibold flex gap-2 items-center ${
+                activeTab === tab
+                  ? 'bg-white text-blue-600 shadow'
+                  : 'text-gray-500'
               }`}
             >
-              {tab === 'DONORS' ? <List size={16} /> : tab === 'REQUEST' ? <Send size={16} /> : <UserPlus size={16} />}
-              {tab.charAt(0) + tab.slice(1).toLowerCase()}
+              {tab === 'DONORS' && <List size={16} />}
+              {tab === 'REQUEST' && <Send size={16} />}
+              {tab === 'REGISTER' && <UserPlus size={16} />}
+              {tab}
             </button>
           ))}
         </div>
       </div>
 
+      {/* DONORS TAB */}
       {activeTab === 'DONORS' && (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Filter by Blood Group</h3>
+        <>
+          <div className="bg-white p-6 rounded-xl border shadow-sm">
+            <h3 className="font-bold mb-4">Filter by Blood Group</h3>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedGroup('ALL')}
-                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                  selectedGroup === 'ALL' ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-200 text-gray-600 hover:border-blue-400'
+                className={`px-4 py-2 rounded ${
+                  selectedGroup === 'ALL'
+                    ? 'bg-blue-600 text-white'
+                    : 'border'
                 }`}
               >
                 All
               </button>
-              {BLOOD_GROUPS.map(group => (
+              {BLOOD_GROUPS.map(bg => (
                 <button
-                  key={group}
-                  onClick={() => setSelectedGroup(group)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                    selectedGroup === group ? 'bg-red-600 border-red-600 text-white' : 'border-gray-200 text-gray-600 hover:border-red-400'
+                  key={bg}
+                  onClick={() => setSelectedGroup(bg)}
+                  className={`px-4 py-2 rounded ${
+                    selectedGroup === bg
+                      ? 'bg-red-600 text-white'
+                      : 'border'
                   }`}
                 >
-                  {group}
+                  {bg}
                 </button>
               ))}
             </div>
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-12"><Loader2 className="animate-spin text-blue-600" /></div>
+            <div className="flex justify-center py-12">
+              <Loader2 className="animate-spin text-blue-600" />
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {donors.map(donor => (
-                <div key={donor.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-bold text-lg border border-red-100">
-                      {donor.bloodGroup}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {donors.map(d => (
+                <div
+                  key={d.id}
+                  className="bg-white p-5 rounded-xl border shadow-sm flex justify-between"
+                >
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-bold">
+                      {d.bloodGroup}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                        {donor.name} {getStatusBadge(donor.available)}
+                      <h4 className="font-bold flex gap-2">
+                        {d.name}
+                        {getStatusBadge(d.available)}
                       </h4>
-                      <p className="text-sm text-gray-500">{donor.city}</p>
+                      <p className="text-sm text-gray-500">{d.city}</p>
                     </div>
                   </div>
-                  <a href={`tel:${donor.phone}`} className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors">
-                    <Phone size={20} />
+                  <a
+                    href={`tel:${d.phone}`}
+                    className="p-3 bg-blue-50 rounded-full text-blue-600"
+                  >
+                    <Phone size={18} />
                   </a>
                 </div>
               ))}
-              {donors.length === 0 && !loading && (
-                <div className="col-span-full py-10 text-center text-gray-400 italic">No donors found for this criteria.</div>
-              )}
             </div>
           )}
+        </>
+      )}
+
+      {/* REQUEST TAB */}
+      {activeTab === 'REQUEST' && (
+        <div className="max-w-xl bg-white p-6 rounded-xl border shadow-sm space-y-4">
+          <h3 className="font-bold text-lg">Request Blood</h3>
+
+          <input
+            placeholder="Patient Name"
+            value={requestForm.patientName}
+            onChange={e => setRequestForm({ ...requestForm, patientName: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <select
+            value={requestForm.bloodGroup}
+            onChange={e => setRequestForm({ ...requestForm, bloodGroup: e.target.value })}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">Select Blood Group</option>
+            {BLOOD_GROUPS.map(bg => (
+              <option key={bg}>{bg}</option>
+            ))}
+          </select>
+
+          <input
+            placeholder="City"
+            value={requestForm.city}
+            onChange={e => setRequestForm({ ...requestForm, city: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <input
+            placeholder="Hospital"
+            value={requestForm.hospitalName}
+            onChange={e => setRequestForm({ ...requestForm, hospitalName: e.target.value })}
+
+            className="w-full border p-2 rounded"
+          />
+
+          <input
+            placeholder="Contact Phone"
+            value={requestForm.contactPhone}
+            onChange={e => setRequestForm({ ...requestForm, contactPhone: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <button
+            onClick={submitRequest}
+            disabled={requestLoading}
+            className="w-full bg-red-600 text-white py-2 rounded font-bold"
+          >
+            {requestLoading ? 'Submitting...' : 'Submit Request'}
+          </button>
         </div>
       )}
 
-      {/* Register and Request forms remain functional with real event handlers to be added as needed */}
+      {/* REGISTER TAB */}
+      {activeTab === 'REGISTER' && (
+        <div className="max-w-xl bg-white p-6 rounded-xl border shadow-sm space-y-4">
+          <h3 className="font-bold text-lg">Register as Donor</h3>
+
+          <input
+            placeholder="Name"
+            value={registerForm.name}
+            onChange={e => setRegisterForm({ ...registerForm, name: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <select
+            value={registerForm.bloodGroup}
+            onChange={e => setRegisterForm({ ...registerForm, bloodGroup: e.target.value })}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">Select Blood Group</option>
+            {BLOOD_GROUPS.map(bg => (
+              <option key={bg}>{bg}</option>
+            ))}
+          </select>
+
+          <input
+            placeholder="City"
+            value={registerForm.city}
+            onChange={e => setRegisterForm({ ...registerForm, city: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <input
+            placeholder="Phone"
+            value={registerForm.phone}
+            onChange={e => setRegisterForm({ ...registerForm, phone: e.target.value })}
+            className="w-full border p-2 rounded"
+          />
+
+          <button
+            onClick={submitRegister}
+            disabled={registerLoading}
+            className="w-full bg-blue-600 text-white py-2 rounded font-bold"
+          >
+            {registerLoading ? 'Registering...' : 'Register Donor'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
