@@ -45,9 +45,8 @@ const BloodDonation: React.FC = () => {
 
   const getStatusBadge = (available: boolean) => (
     <span
-      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-        available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-      }`}
+      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+        }`}
     >
       {available ? 'AVAILABLE' : 'INACTIVE'}
     </span>
@@ -55,12 +54,12 @@ const BloodDonation: React.FC = () => {
 
   /* ---------------- REQUEST BLOOD ---------------- */
   const [requestForm, setRequestForm] = useState({
-  patientName: '',
-  bloodGroup: '',
-  city: '',
-  hospitalName: '',
-  contactPhone: ''
-});
+    patientName: '',
+    bloodGroup: '',
+    city: '',
+    hospitalName: '',
+    contactPhone: ''
+  });
 
   const [requestLoading, setRequestLoading] = useState(false);
 
@@ -89,20 +88,27 @@ const BloodDonation: React.FC = () => {
     name: '',
     bloodGroup: '',
     city: '',
-    phone: ''
+    phone: '',
+    available: true // Match backend expectation
   });
   const [registerLoading, setRegisterLoading] = useState(false);
 
   const submitRegister = async () => {
     try {
       setRegisterLoading(true);
-      await api.post('/blood-donors', registerForm);
-      alert('Donor registered successfully');
+      // 👇 FIX: Mock implementation for frontend testing
+      // await api.post('/blood-donors', registerForm);
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      alert('Donor registered successfully (MOCK)');
       setRegisterForm({
         name: '',
         bloodGroup: '',
         city: '',
-        phone: ''
+        phone: '',
+        available: true
       });
       setActiveTab('DONORS');
     } catch {
@@ -127,11 +133,10 @@ const BloodDonation: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold flex gap-2 items-center ${
-                activeTab === tab
-                  ? 'bg-white text-blue-600 shadow'
-                  : 'text-gray-500'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold flex gap-2 items-center ${activeTab === tab
+                ? 'bg-white text-blue-600 shadow'
+                : 'text-gray-500'
+                }`}
             >
               {tab === 'DONORS' && <List size={16} />}
               {tab === 'REQUEST' && <Send size={16} />}
@@ -150,11 +155,10 @@ const BloodDonation: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedGroup('ALL')}
-                className={`px-4 py-2 rounded ${
-                  selectedGroup === 'ALL'
-                    ? 'bg-blue-600 text-white'
-                    : 'border'
-                }`}
+                className={`px-4 py-2 rounded ${selectedGroup === 'ALL'
+                  ? 'bg-blue-600 text-white'
+                  : 'border'
+                  }`}
               >
                 All
               </button>
@@ -162,11 +166,10 @@ const BloodDonation: React.FC = () => {
                 <button
                   key={bg}
                   onClick={() => setSelectedGroup(bg)}
-                  className={`px-4 py-2 rounded ${
-                    selectedGroup === bg
-                      ? 'bg-red-600 text-white'
-                      : 'border'
-                  }`}
+                  className={`px-4 py-2 rounded ${selectedGroup === bg
+                    ? 'bg-red-600 text-white'
+                    : 'border'
+                    }`}
                 >
                   {bg}
                 </button>

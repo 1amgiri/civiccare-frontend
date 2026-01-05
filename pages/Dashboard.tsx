@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PhoneCall, Droplet, AlertTriangle, 
-  ArrowRight, CheckCircle2, Loader2, AlertCircle 
+import {
+  PhoneCall, Droplet, AlertTriangle,
+  ArrowRight, CheckCircle2, Loader2, AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Role } from '../types';
@@ -40,28 +40,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   }, []);
 
   const statItems = [
-  {
-    label: 'Active SOS',
-    value: stats?.activeSosCount,
-    icon: AlertTriangle,
-    color: 'text-red-600',
-    bg: 'bg-red-50',
-  },
-  {
-    label: 'Available Donors',
-    value: stats?.availableDonorCount,
-    icon: Droplet,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-  },
-  {
-    label: 'Verified Services',
-    value: stats?.verifiedServiceCount,
-    icon: PhoneCall,
-    color: 'text-green-600',
-    bg: 'bg-green-50',
-  },
-];
+    {
+      label: 'Active SOS',
+      value: 3, // Static value as requested
+      icon: AlertTriangle,
+      color: 'text-red-600',
+      bg: 'bg-red-50',
+    },
+    {
+      label: 'Available Donors',
+      value: stats?.availableDonorCount,
+      icon: Droplet,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+    },
+    {
+      label: 'Verified Services',
+      value: stats?.verifiedServiceCount,
+      icon: PhoneCall,
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+    },
+  ];
 
 
   const quickActions = [
